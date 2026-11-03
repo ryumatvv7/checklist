@@ -1,0 +1,311 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Чеклист Полины</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f4ef; --card:#ffffff; --ink:#1d1b18; --muted:#6f6a62; --line:#e7e2d8;
+  --accent:#2f6b4f; --accent-soft:#e3efe8; --warn:#9a5b12; --warn-soft:#fbf0de;
+  --done:#a39d93; --chip:#f0ece4;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#151513; --card:#1e1e1b; --ink:#ece8e1; --muted:#9b958b; --line:#2e2d29;
+    --accent:#6fbf96; --accent-soft:#1f3329; --warn:#e2a95a; --warn-soft:#33281a;
+    --done:#6c675f; --chip:#2a2925;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Manrope,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:28px 16px 80px}
+header h1{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:0 0 6px}
+header p{margin:0;color:var(--muted);font-size:15px}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:18px 0 22px}
+.who{display:flex;background:var(--chip);border-radius:999px;padding:3px}
+.who button{border:0;background:transparent;color:var(--muted);font:600 14px Manrope,sans-serif;padding:7px 14px;border-radius:999px;cursor:pointer}
+.who button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.sync{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px;margin-left:auto}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--done)}
+.dot.ok{background:var(--accent)} .dot.err{background:#c0392b}
+.tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:18px;overflow-x:auto}
+.tab{border:0;background:none;font:700 15px Manrope,sans-serif;color:var(--muted);padding:10px 4px 12px;margin-right:14px;cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
+.tab.on{color:var(--ink);border-color:var(--accent)}
+.tab .n{font-weight:600;color:var(--muted);margin-left:6px;font-size:13px}
+.progress{display:flex;align-items:center;gap:12px;margin:0 0 20px}
+.track{flex:1;height:8px;background:var(--chip);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--accent);border-radius:99px;transition:width .35s ease}
+.pct{font-weight:700;font-size:14px;min-width:70px;text-align:right}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:12px;padding:12px 14px;font-size:14px;line-height:1.5;margin-bottom:20px}
+.note b{color:var(--warn)}
+section{margin-bottom:26px}
+section h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin:0 0 10px 2px;display:flex;justify-content:space-between}
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.item{display:flex;gap:12px;padding:14px 14px;border-top:1px solid var(--line);cursor:pointer;align-items:flex-start;transition:background .15s}
+.item:first-child{border-top:0}
+.item:hover{background:color-mix(in srgb,var(--chip) 50%,transparent)}
+.box{flex:none;width:22px;height:22px;border-radius:7px;border:2px solid var(--line);margin-top:1px;display:grid;place-items:center;transition:all .15s}
+.item.done .box{background:var(--accent);border-color:var(--accent)}
+.box svg{width:14px;height:14px;opacity:0;stroke:#fff}
+.item.done .box svg{opacity:1}
+.txt{flex:1;min-width:0}
+.t{font-weight:600;font-size:15px;line-height:1.4}
+.item.done .t{color:var(--done);text-decoration:line-through;text-decoration-thickness:1.5px}
+.d{font-size:13.5px;color:var(--muted);line-height:1.5;margin-top:3px}
+.d a{color:var(--accent)}
+.tag{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:1px;background:var(--chip);color:var(--muted)}
+.tag.have{background:var(--accent-soft);color:var(--accent)}
+.tag.new{background:var(--warn-soft);color:var(--warn)}
+.by{font-size:12px;color:var(--muted);margin-top:5px}
+.panel{display:none}.panel.on{display:block}
+.empty{padding:40px 20px;text-align:center;color:var(--muted)}
+footer{font-size:12.5px;color:var(--muted);line-height:1.6;margin-top:30px}
+footer a{color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Чеклист Полины</h1>
+    <p>Общий список: отметки видны нам обоим и обновляются сами.</p>
+  </header>
+
+  <div class="bar">
+    <div class="who" id="who">
+      <button data-n="Матвей">Матвей</button>
+      <button data-n="Полина">Полина</button>
+    </div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncTxt">подключаюсь…</span></div>
+  </div>
+
+  <div id="app"></div>
+
+  <footer>
+    Источники: <a href="https://www.uni-graz.at/en/studies/admission-and-deadlines/internationals/" target="_blank" rel="noopener">Uni Graz — Internationals</a> ·
+    <a href="https://internationale-studierende.uni-graz.at/de/bewerbung-bachelor-diplomstudium/" target="_blank" rel="noopener">Uni Graz — документы</a> ·
+    <a href="https://oead.at/de/nach-oesterreich/einreise-und-aufenthalt/aufenthaltsbewilligung-student-kein-mobilitaetsprogramm" target="_blank" rel="noopener">OeAD — ВНЖ Student</a> ·
+    <a href="https://www.avstwiki.org/uni/uni-graz" target="_blank" rel="noopener">avstwiki</a>.
+    Суммы и сроки — по состоянию на ноябрь 2026, перед подачей сверяйтесь с сайтами.
+  </footer>
+</div>
+
+<script>
+const SUPABASE_URL = "https://scfcutwfcjjiilmlshbq.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNjZmN1dHdmY2pqaWlsbWxzaGJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyMDM3NTEsImV4cCI6MjEwODc3OTc1MX0.RwIcKNDNXfKPLP6o5AVe5SkYs2sFYImOHC43tMSpwSs";
+
+const LISTS = [
+ { id:"uni", title:"Uni Graz · Психология",
+   note:"<b>Подача: 16 ноября – 14 декабря 2026</b> (летний семестр 2027, граждане третьих стран). Подавать только с полным комплектом — неполная заявка = отказ, и повторно в этом семестре уже нельзя. Бешайд MedUni сюда не переносится, но почти все документы с той подачи пригодятся.",
+   sections:[
+   { h:"ЕГЭ — самое долгое, начать сразу", items:[
+     ["ege_doc","Бумажная справка о результатах ЕГЭ","С подписью и печатью. Выдаёт школа или РЦОИ — маме сначала позвонить в школу. Распечатка из Госуслуг не подойдёт.","new"],
+     ["ege_copy","Нотариальная копия справки ЕГЭ","Минобр на справку ЕГЭ апостиль не ставит, поэтому работаем через копию.","new"],
+     ["ege_apo","Апостиль Минюста на нотариальную копию","","new"],
+     ["ege_tr","Нотариальный перевод справки ЕГЭ","Заверительная надпись нотариуса должна быть продублирована на немецком/английском. Альтернатива — присяжный переводчик в Австрии.","new"],
+   ]},
+   { h:"Школьные документы", items:[
+     ["att","Аттестат с вкладышем и апостилем Минобра","Уже есть с подачи в MedUni. Нужен скан оригинала.","have"],
+     ["att_tr","Перевод аттестата","Уже есть. Загружается одним PDF вместе с оригиналом.","have"],
+     ["grades","Справка из школы: оценки и часы за 9–11 классы","Замена австрийских «табелей старших классов».","new"],
+     ["grades_tr","Перевод справки с оценками","","new"],
+   ]},
+   { h:"Остальное для заявки", items:[
+     ["lang","Сертификат немецкого","Уже есть. Заверять не нужно.","have"],
+     ["pass","Скан паспорта","Только страница с данными и подписью.","have"],
+     ["antrag","Заявление Antrag auf Erteilung eines Studienplatzes","Заполнить и подписать самой. <a href='https://static.uni-graz.at/fileadmin/_files/_project_sites/_internationale-studierende/Dateien/Antrag_auf_Erteilung_eines_Studienplatzes_DE.pdf' target='_blank' rel='noopener'>Скачать форму</a>","new"],
+     ["cv","Резюме (CV) в PDF","","new"],
+     ["mail","Письмо в zulassung.international@uni-graz.at","Уточнить: примут ли российский перевод справки ЕГЭ и засчитают ли экзамены, уже сданные в VGUH.",""],
+   ]},
+   { h:"Подача", items:[
+     ["scans","Проверить сканы","Сканы оригиналов (не копий), цветные, все страницы, печати и апостили видны целиком. Оригинал + перевод = один PDF.",""],
+     ["basis","Basisaccount в UNIGRAZonline","При регистрации выбрать тип: 25 — foreign secondary school-leaving exam.",""],
+     ["submit","Подать заявку онлайн до 14.12.2026","Только когда всё выше отмечено.",""],
+   ]},
+   { h:"Вступительный экзамен (отдельная процедура)", items:[
+     ["av_c1","Немецкий на уровне C1 к экзамену","Экзамен проводится на немецком.",""],
+     ["av_reg","Зарегистрироваться на Aufnahmeverfahren Psychologie","Весной 2027 (в 2026 окно было 2 марта – 4 мая) на studienzugang.uni-graz.at. Сдавать в том учебном году, когда заканчивается VGUH.",""],
+     ["av_fee","Оплатить взнос 50 €","",""],
+     ["av_prep","Подготовка к экзамену","Материалы публикуются на сайте Aufnahmeverfahren.",""],
+     ["av_exam","Сдать экзамен","Дата объявляется весной.",""],
+   ]},
+ ]},
+ { id:"vnzh", title:"Продление ВНЖ",
+   note:"<b>Подавать не раньше чем за 3 месяца до окончания и обязательно до окончания карты.</b> В Граце продление делает Amt der Steiermärkischen Landesregierung, подача лично. После своевременной подачи можно легально оставаться в Австрии, пока решают.",
+   sections:[
+   { h:"Сроки и запись", items:[
+     ["v_date","Посмотреть дату окончания на карте ВНЖ","И поставить напоминание за 3 месяца.",""],
+     ["v_termin","Записаться на термин в Landesregierung","",""],
+     ["v_fee","Пошлина 218 € — оплатить при подаче","Не возвращается при отказе.",""],
+   ]},
+   { h:"Основное", items:[
+     ["v_form","Анкета (Antragsformular B), подписанная","<a href='https://www.bmi.gv.at/312/60a/files/b/239-2026-antragsformular-b-aufenthaltstitel-drittstaatsangehoerige-de-v20260915-bf.pdf' target='_blank' rel='noopener'>Скачать форму</a>",""],
+     ["v_pass","Действующий загранпаспорт + копия","Проверить, что паспорт действует ещё минимум год — иначе ВНЖ дадут короче.",""],
+     ["v_photo","Фото 3,5×4,5 см, цветное, не старше 6 месяцев","По критериям ICAO.",""],
+   ]},
+   { h:"Учёба", items:[
+     ["v_erfolg","Подтверждение успеваемости за прошлый учебный год","Для университета: 16 ECTS или 8 часов. Для VGUH — справка о сданных Ergänzungsprüfungen/успеваемости; уточнить в VGUH, какую именно бумагу дать.","new"],
+     ["v_fort","Fortsetzungsbestätigung","Подтверждение, что взнос за текущий семестр оплачен.",""],
+     ["v_blatt","Studienblatt (Studienbuchblatt)","Выгружается в UNIGRAZonline.",""],
+     ["v_bescheid","Новый бешайд Uni Graz — если уже пришёл","Смену программы надо сообщить в ведомство.",""],
+   ]},
+   { h:"Деньги, жильё, страховка", items:[
+     ["v_money","Деньги на 12 месяцев на счёте на её имя","До 24 лет: 722,58 €/мес ≈ 8 671 € на год (ставка 2026). Аренда сверх 386,43 €/мес и страховка — дополнительно. Альтернатива: Haftungserklärung.",""],
+     ["v_origin","Выписка за 6 месяцев / объяснение, откуда деньги","Если деньги от родителей — их заявление и выписка.",""],
+     ["v_aufw","Erklärung über regelmäßige Aufwendungen","Декларация о кредитах и регулярных платежах.",""],
+     ["v_miete","Договор аренды или общежития","",""],
+     ["v_melde","Meldezettel","",""],
+     ["v_insur","Страховка","ÖGK Studierendenselbstversicherung (78,84 €/мес в 2026) или частная all-risk со спецподтверждением.",""],
+     ["v_ogk","Fortsetzungsbestätigung в ÖGK до 31.12","Иначе страховка ÖGK может слететь.",""],
+     ["v_ksv","Selbstauskunft KSV 1870","Справка из кредитного бюро — нужна именно при продлении. Заказывается онлайн.","new"],
+   ]},
+   { h:"После подачи", items:[
+     ["v_receipt","Сохранить подтверждение подачи","",""],
+     ["v_travel","Если нужно уехать до решения — Notvignette","Даётся один раз за процедуру продления, действует 3 месяца.",""],
+   ]},
+ ]},
+];
+
+// --- state ---
+const KEY = new URLSearchParams(location.hash.slice(1)).get("k");
+let state = {};          // item_id -> {checked, updated_by, updated_at}
+let pending = new Map(); // item_id -> timestamp of local write
+let me = null;
+try { me = localStorage.getItem("who"); } catch(e) {}
+let activeTab = "uni";
+try { activeTab = localStorage.getItem("tab") || "uni"; } catch(e) {}
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function setSync(kind, text){
+  $("#dot").className = "dot " + kind;
+  $("#syncTxt").textContent = text;
+}
+
+async function rpc(fn, body){
+  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method:"POST",
+    headers:{ "apikey":ANON_KEY, "Authorization":"Bearer "+ANON_KEY, "Content-Type":"application/json" },
+    body: JSON.stringify(body)
+  });
+  if(!r.ok) throw new Error(await r.text());
+  const t = await r.text();
+  return t ? JSON.parse(t) : null;
+}
+
+async function pull(){
+  if(!KEY) return;
+  try{
+    const rows = await rpc("get_checklist", { p_key: KEY });
+    const now = Date.now();
+    for(const row of rows){
+      const p = pending.get(row.item_id);
+      if(p && now - p < 6000) continue; // keep our optimistic value
+      state[row.item_id] = row;
+    }
+    setSync("ok", "синхронизировано");
+    render();
+  }catch(e){
+    setSync("err", "нет связи, пробую снова…");
+  }
+}
+
+async function toggle(id){
+  if(!me){ alert("Сначала выбери сверху, кто ты 🙂"); return; }
+  const cur = state[id]?.checked || false;
+  const next = !cur;
+  state[id] = { item_id:id, checked:next, updated_by:me, updated_at:new Date().toISOString() };
+  pending.set(id, Date.now());
+  render();
+  try{
+    await rpc("set_checklist_item", { p_key:KEY, p_item:id, p_checked:next, p_by:me });
+    setSync("ok", "сохранено");
+  }catch(e){
+    setSync("err", "не сохранилось — проверь интернет");
+    state[id].checked = cur;
+    render();
+  }
+}
+
+function fmt(ts){
+  const d = new Date(ts);
+  return d.toLocaleString("ru-RU", { day:"numeric", month:"short", hour:"2-digit", minute:"2-digit" });
+}
+
+function counts(list){
+  let total=0, done=0;
+  for(const s of list.sections) for(const it of s.items){ total++; if(state[it[0]]?.checked) done++; }
+  return {total, done};
+}
+
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const TAGS = { have:"уже есть", new:"новое" };
+
+function render(){
+  const app = $("#app");
+  if(!KEY){
+    app.innerHTML = '<div class="empty">В ссылке нет ключа доступа.<br>Открой полную ссылку, которую прислал Матвей.</div>';
+    setSync("err", "нет ключа");
+    return;
+  }
+  let html = '<div class="tabs">';
+  for(const l of LISTS){
+    const c = counts(l);
+    html += `<button class="tab ${l.id===activeTab?"on":""}" data-tab="${l.id}">${esc(l.title)}<span class="n">${c.done}/${c.total}</span></button>`;
+  }
+  html += '</div>';
+  for(const l of LISTS){
+    const c = counts(l);
+    const pct = c.total ? Math.round(c.done/c.total*100) : 0;
+    html += `<div class="panel ${l.id===activeTab?"on":""}">`;
+    html += `<div class="progress"><div class="track"><div class="fill" style="width:${pct}%"></div></div><div class="pct">${c.done} из ${c.total}</div></div>`;
+    html += `<div class="note">${l.note}</div>`;
+    for(const s of l.sections){
+      const sd = s.items.filter(it => state[it[0]]?.checked).length;
+      html += `<section><h2><span>${esc(s.h)}</span><span>${sd}/${s.items.length}</span></h2><div class="list">`;
+      for(const [id,t,d,tag] of s.items){
+        const st = state[id];
+        const done = !!st?.checked;
+        const by = st?.updated_by ? `<div class="by">${done?"✓ отметил(а)":"снял(а) отметку"}: ${esc(st.updated_by)} · ${fmt(st.updated_at)}</div>` : "";
+        html += `<div class="item ${done?"done":""}" data-id="${id}" role="checkbox" aria-checked="${done}" tabindex="0">
+          <div class="box">${CHECK}</div>
+          <div class="txt"><div class="t">${esc(t)}${tag?`<span class="tag ${tag}">${TAGS[tag]}</span>`:""}</div>
+          ${d?`<div class="d">${d}</div>`:""}${by}</div></div>`;
+      }
+      html += '</div></section>';
+    }
+    html += '</div>';
+  }
+  app.innerHTML = html;
+}
+
+document.addEventListener("click", e => {
+  if(e.target.closest("a")) return;
+  const tab = e.target.closest(".tab");
+  if(tab){ activeTab = tab.dataset.tab; try{localStorage.setItem("tab",activeTab)}catch(_){} render(); return; }
+  const item = e.target.closest(".item");
+  if(item) toggle(item.dataset.id);
+  const w = e.target.closest(".who button");
+  if(w){ me = w.dataset.n; try{localStorage.setItem("who",me)}catch(_){} paintWho(); }
+});
+document.addEventListener("keydown", e => {
+  const item = e.target.closest?.(".item");
+  if(item && (e.key===" " || e.key==="Enter")){ e.preventDefault(); toggle(item.dataset.id); }
+});
+function paintWho(){
+  document.querySelectorAll(".who button").forEach(b => b.classList.toggle("on", b.dataset.n===me));
+}
+document.addEventListener("visibilitychange", () => { if(!document.hidden) pull(); });
+window.addEventListener("hashchange", () => location.reload());
+
+paintWho();
+render();
+pull();
+setInterval(() => { if(!document.hidden) pull(); }, 4000);
+</script>
+</body>
+</html>
